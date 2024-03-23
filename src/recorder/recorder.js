@@ -10,6 +10,7 @@ const VideoRecorder = () => {
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const timerRef = useRef(null);
+  const [showRecordedVideo, setShowRecordedVideo] = useState(false);
 
   useEffect(() => {
     startPreview();
@@ -49,6 +50,7 @@ const VideoRecorder = () => {
       recorder.onstop = () => {
         setRecording(false);
         setRecordedChunks(chunks);
+        setShowRecordedVideo(true);
       };
       recorder.start();
       setRecording(true);
@@ -61,6 +63,8 @@ const VideoRecorder = () => {
       mediaRecorderRef.current.stop();
       if (timerRef.current) clearInterval(timerRef.current);
       setRecordedTime(0);
+      setRecording(false);
+      setShowRecordedVideo(false);
     }
   };
 
@@ -96,32 +100,39 @@ const VideoRecorder = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleStartRecording = () => {
+    startRecording();
+    setShowRecordedVideo(false)
+    if (recordedChunks.length > 0) {
+      startPreview();
+    }
+  };
+
   return (
     <div>
-      {mediaStream && <video ref={videoRef} autoPlay />}
       <div>
-        {!recording && (
-          <button className="start-btn" onClick={startRecording}>
-            Start Recording
-          </button>
+        {mediaStream && !showRecordedVideo && (
+          <video ref={videoRef} autoPlay muted />
         )}
-        {recording && (
-          <button className="stop-btn" onClick={stopRecording}>
-            Stop Recording
-          </button>
-        )}
-        {recording && (
-          <button className="pause-btn" onClick={pauseRecording}>
-            {paused ? "Resume" : "Pause"}
-          </button>
-        )}
-        {!recording && recordedChunks.length > 0 && (
-          <button className="dwn-btn" onClick={downloadVideo}>
-            Download
-          </button>
+        {showRecordedVideo && recordedChunks.length > 0 && (
+          <video controls src={URL.createObjectURL(new Blob(recordedChunks, { type: "video/webm" }))} />
         )}
       </div>
-      {recording && <div>Recording: {recordedTime} seconds</div>}
+      <div>
+        {!recording && (
+          <button className="start-btn" onClick={handleStartRecording}>Start Recording</button>
+        )}
+        {recording && (
+          <button className="stop-btn" onClick={stopRecording}>Stop Recording</button>
+        )}
+        {recording && (
+          <button className="pause-btn" onClick={pauseRecording}>{paused ? "Resume" : "Pause"}</button>
+        )}
+        {!recording && showRecordedVideo && (
+          <button className="dwn-btn" onClick={downloadVideo}>Download</button>
+        )}
+        {recording && <div>Recording: {recordedTime} seconds</div>}
+      </div>
     </div>
   );
 };

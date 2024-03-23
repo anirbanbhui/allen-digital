@@ -1,0 +1,16 @@
+.start-btn,
+.stop-btn,
+.pause-btn,
+.dwn-btn {
+  margin-top: 24px;
+  margin-right: 12px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid white;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: red;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
